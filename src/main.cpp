@@ -1,21 +1,21 @@
 #include <Arduino.h>
 #include "WebServerManager.h"
 
-// WiFi credentials
-const char* ssid = "DEIF-Public";
-const char* password = "DEIF1933";
-
 WebServerManager* webServer;
 
 void setup() 
 {
-    Serial.begin(115200);
+  Serial.begin(115200);
+  delay(1000);  // Give serial connection time to start
     
-    webServer = new WebServerManager(ssid, password);
-    webServer->begin();
+  Serial.println("Starting ESP32 Web Server...");
+    
+  webServer = new WebServerManager();
+  webServer->begin();
 }
 
 void loop() 
 {
-    webServer->handleClient();
+  webServer->handleClient();
+  delay(2);
 }

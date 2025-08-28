@@ -1,8 +1,9 @@
 #include "LoginPage.h"
 #include <cstring> 
 #include <Arduino.h>
+#include <WiFi.h>
 
-const char* LoginPage::loginHTML = R"(
+const char* LoginPage::loginHTML = R"delimiter(
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,23 +11,43 @@ const char* LoginPage::loginHTML = R"(
     <style>
         body { font-family: Arial; text-align: center; margin-top: 50px; }
         .login-form { display: inline-block; padding: 20px; border: 1px solid #ccc; }
-        input { margin: 10px; padding: 5px; }
+        input, select { margin: 10px; padding: 5px; width: 200px; }
         .title { color: #333; margin-bottom: 30px; }
+        .refresh-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
     </style>
+    <script>
+        function refreshNetworks() {
+            fetch('/scan-networks')
+                .then(response => window.location.reload());
+        }
+    </script>
 </head>
 <body>
     <h1 class="title">ESP32 - DEIF Webserver</h1>
     <div class="login-form">
-        <h2>Login</h2>
-        <form action="/login" method="POST">
-            <input type="text" name="username" placeholder="Username" required><br>
-            <input type="password" name="password" placeholder="Password" required><br>
-            <input type="submit" value="Login">
+        <h2>WiFi Setup & Login</h2>
+        <form action="/connect" method="POST">
+            <select name="network" required>
+                <option value="">Select WiFi Network</option>
+                %NETWORK_LIST%
+            </select><br>
+            <input type="password" name="wifi_password" placeholder="WiFi Password" required><br>
+            <input type="text" name="username" placeholder="Login Username" required><br>
+            <input type="password" name="password" placeholder="Login Password" required><br>
+            <button type="button" class="refresh-btn" onclick="refreshNetworks()">Refresh Networks</button><br>
+            <input type="submit" value="Connect & Login">
         </form>
     </div>
 </body>
 </html>
-)";
+)delimiter";
 
 const char* LoginPage::dashboardHTML = R"delimiter(
 <!DOCTYPE html>
@@ -82,20 +103,15 @@ const char* LoginPage::dashboardHTML = R"delimiter(
 )delimiter";
 
 LoginPage::LoginPage(const char* user, const char* pass) 
-    : username(user), password(pass), buttonState(false) 
+    : username(user), password(pass), buttonState(false), isAuthenticated(false) 
     {
-        begin();
-    }
+    begin();
+}
 
 void LoginPage::begin() 
 {
     pinMode(ledPin, OUTPUT);
     digitalWrite(ledPin, LOW);
-}
-
-const char* LoginPage::getLoginPage() const 
-{
-    return loginHTML;
 }
 
 const char* LoginPage::getDashboardPage() const 
@@ -125,6 +141,9 @@ const char* LoginPage::getDashboardPage() const
 
 bool LoginPage::validateCredentials(const char* user, const char* pass) const 
 {
+    if (!user || !pass) {
+        return false;
+    }
     return (strcmp(user, username) == 0 && strcmp(pass, password) == 0);
 }
 
@@ -137,4 +156,33 @@ void LoginPage::toggleButton()
 bool LoginPage::getButtonState() const 
 {
     return buttonState;
+}
+
+void LoginPage::scanNetworks() 
+{
+    networkList.clear();
+    int n = WiFi.scanNetworks();
+    for (int i = 0; i < n; ++i) 
+    {
+        networkList.push_back(WiFi.SSID(i));
+    }
+}
+
+String LoginPage::getNetworksAsOptions() const 
+{
+    String options;
+    for (const String& network : networkList) 
+    {
+        options += "<option value=\"" + network + "\">" + network + "</option>";
+    }
+    return options;
+}
+
+const char* LoginPage::getLoginPage() const 
+{
+    static char buffer[8192];
+    String page = loginHTML;
+    page.replace("%NETWORK_LIST%", getNetworksAsOptions());
+    strcpy(buffer, page.c_str());
+    return buffer;
 }
