@@ -1,5 +1,6 @@
 #include "LoginPage.h"
 #include <cstring> 
+#include <Arduino.h>
 
 const char* LoginPage::loginHTML = R"(
 <!DOCTYPE html>
@@ -81,13 +82,24 @@ const char* LoginPage::dashboardHTML = R"delimiter(
 )delimiter";
 
 LoginPage::LoginPage(const char* user, const char* pass) 
-    : username(user), password(pass), buttonState(false) {}
+    : username(user), password(pass), buttonState(false) 
+    {
+        begin();
+    }
 
-const char* LoginPage::getLoginPage() const {
+void LoginPage::begin() 
+{
+    pinMode(ledPin, OUTPUT);
+    digitalWrite(ledPin, LOW);
+}
+
+const char* LoginPage::getLoginPage() const 
+{
     return loginHTML;
 }
 
-const char* LoginPage::getDashboardPage() const {
+const char* LoginPage::getDashboardPage() const 
+{
     static char buffer[4096];
     strcpy(buffer, dashboardHTML);
     
@@ -111,14 +123,18 @@ const char* LoginPage::getDashboardPage() const {
     return buffer;
 }
 
-bool LoginPage::validateCredentials(const char* user, const char* pass) const {
+bool LoginPage::validateCredentials(const char* user, const char* pass) const 
+{
     return (strcmp(user, username) == 0 && strcmp(pass, password) == 0);
 }
 
-void LoginPage::toggleButton() {
+void LoginPage::toggleButton() 
+{
     buttonState = !buttonState;
+    digitalWrite(ledPin, buttonState ? HIGH : LOW);
 }
 
-bool LoginPage::getButtonState() const {
+bool LoginPage::getButtonState() const 
+{
     return buttonState;
 }

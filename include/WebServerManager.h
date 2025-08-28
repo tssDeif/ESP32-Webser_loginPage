@@ -3,7 +3,8 @@
 #include <WebServer.h>
 #include "LoginPage.h"
 
-class WebServerManager {
+class WebServerManager 
+{
 private:
     WebServer server;
     LoginPage loginPage;

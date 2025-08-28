@@ -8,7 +8,8 @@ WebServerManager::WebServerManager(const char* wifi_ssid, const char* wifi_passw
     instance = this;
 }
 
-void WebServerManager::begin() {
+void WebServerManager::begin() 
+{
     WiFi.begin(ssid, password);
     Serial.print("Connecting to WiFi");
     
@@ -30,19 +31,23 @@ void WebServerManager::begin() {
     Serial.println("HTTP server started");
 }
 
-void WebServerManager::handleClient() {
+void WebServerManager::handleClient() 
+{
     server.handleClient();
 }
 
-WebServerManager* WebServerManager::getInstance() {
+WebServerManager* WebServerManager::getInstance() 
+{
     return instance;
 }
 
-void WebServerManager::handleRoot() {
+void WebServerManager::handleRoot() 
+{
     server.send(200, "text/html", loginPage.getLoginPage());
 }
 
-void WebServerManager::handleLogin() {
+void WebServerManager::handleLogin() 
+{
     if (server.method() != HTTP_POST) {
         return server.send(405, "text/plain", "Method Not Allowed");
     }
@@ -57,28 +62,34 @@ void WebServerManager::handleLogin() {
     }
 }
 
-void WebServerManager::handleDashboard() {
+void WebServerManager::handleDashboard() 
+{
     server.send(200, "text/html", loginPage.getDashboardPage());
 }
 
-void WebServerManager::handleToggle() {
+void WebServerManager::handleToggle() 
+{
     loginPage.toggleButton();
     server.send(200, "text/plain", loginPage.getButtonState() ? "ON" : "OFF");
 }
 
 // Static wrapper functions
-void WebServerManager::handleRootWrapper() {
+void WebServerManager::handleRootWrapper() 
+{
     if (instance) instance->handleRoot();
 }
 
-void WebServerManager::handleLoginWrapper() {
+void WebServerManager::handleLoginWrapper() 
+{
     if (instance) instance->handleLogin();
 }
 
-void WebServerManager::handleDashboardWrapper() {
+void WebServerManager::handleDashboardWrapper() 
+{
     if (instance) instance->handleDashboard();
 }
 
-void WebServerManager::handleToggleWrapper() {
+void WebServerManager::handleToggleWrapper() 
+{
     if (instance) instance->handleToggle();
 }
