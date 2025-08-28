@@ -23,6 +23,8 @@ void WebServerManager::begin() {
 
     server.on("/", HTTP_GET, handleRootWrapper);
     server.on("/login", HTTP_POST, handleLoginWrapper);
+    server.on("/dashboard", HTTP_GET, handleDashboardWrapper);
+    server.on("/toggle", HTTP_POST, handleToggleWrapper);
     
     server.begin();
     Serial.println("HTTP server started");
@@ -48,16 +50,35 @@ void WebServerManager::handleLogin() {
     if (loginPage.validateCredentials(
         server.arg("username").c_str(), 
         server.arg("password").c_str())) {
-        server.send(200, "text/html", "<h1>Login Successful!</h1>");
+        server.sendHeader("Location", "/dashboard");
+        server.send(303);
     } else {
         server.send(401, "text/html", "<h1>Login Failed!</h1>");
     }
 }
 
+void WebServerManager::handleDashboard() {
+    server.send(200, "text/html", loginPage.getDashboardPage());
+}
+
+void WebServerManager::handleToggle() {
+    loginPage.toggleButton();
+    server.send(200, "text/plain", loginPage.getButtonState() ? "ON" : "OFF");
+}
+
+// Static wrapper functions
 void WebServerManager::handleRootWrapper() {
     if (instance) instance->handleRoot();
 }
 
 void WebServerManager::handleLoginWrapper() {
     if (instance) instance->handleLogin();
+}
+
+void WebServerManager::handleDashboardWrapper() {
+    if (instance) instance->handleDashboard();
+}
+
+void WebServerManager::handleToggleWrapper() {
+    if (instance) instance->handleToggle();
 }

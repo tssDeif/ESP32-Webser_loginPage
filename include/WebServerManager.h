@@ -13,6 +13,8 @@ private:
     static WebServerManager* instance;
     void handleRoot();
     void handleLogin();
+    void handleDashboard();
+    void handleToggle();
 
 public:
     WebServerManager(const char* wifi_ssid, const char* wifi_password);
@@ -23,4 +25,6 @@ public:
     // Callback wrappers
     static void handleRootWrapper();
     static void handleLoginWrapper();
+    static void handleDashboardWrapper();
+    static void handleToggleWrapper();
 };
