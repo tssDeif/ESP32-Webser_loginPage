@@ -74,6 +74,13 @@ const char* LoginPage::dashboardHTML = R"delimiter(
             background-color: #f44336;
             color: white;
         }
+        .pin-label {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+            display: block;
+        }
     </style>
     <script>
         function toggleButton() {
@@ -111,7 +118,9 @@ const char* LoginPage::dashboardHTML = R"delimiter(
     <h1 class="title">ESP32 - DEIF Dashboard</h1>
     <div class="dashboard">
         <h2>Control Panel</h2>
+        <label class="pin-label">GPIO D2</label>
         <button id="toggleBtn" onclick="toggleButton()" class="button %BUTTON_STATE%">%BUTTON_TEXT%</button><br>
+        <label class="pin-label">GPIO D4</label>
         <button id="toggleBtn2" onclick="toggleButton2()" class="button %BUTTON2_STATE%">%BUTTON2_TEXT%</button>
     </div>
 </body>
