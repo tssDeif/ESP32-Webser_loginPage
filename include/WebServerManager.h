@@ -15,6 +15,7 @@ private:
     void handleLogin();
     void handleDashboard();
     void handleToggle();
+    void handleToggle2();
     void handleScanNetworks();
     void handleConnect();
 
@@ -28,6 +29,7 @@ public:
     static void handleLoginWrapper();
     static void handleDashboardWrapper();
     static void handleToggleWrapper();
+    static void handleToggle2Wrapper();
     static void handleScanNetworksWrapper();
     static void handleConnectWrapper();
 };

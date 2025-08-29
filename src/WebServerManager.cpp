@@ -43,6 +43,7 @@ void WebServerManager::begin() {
     server.on("/login", HTTP_POST, handleLoginWrapper);
     server.on("/dashboard", HTTP_GET, handleDashboardWrapper);
     server.on("/toggle", HTTP_POST, handleToggleWrapper);
+    server.on("/toggle2", HTTP_POST, handleToggle2Wrapper);
     server.on("/scan-networks", HTTP_GET, handleScanNetworksWrapper);
     
     // Start server
@@ -240,6 +241,16 @@ void WebServerManager::handleToggle()
     server.send(200, "text/plain", loginPage.getButtonState() ? "ON" : "OFF");
 }
 
+void WebServerManager::handleToggle2() 
+{
+    if (!checkAuthentication()) 
+    {
+        return;
+    }
+    loginPage.toggleButton2();
+    server.send(200, "text/plain", loginPage.getButton2State() ? "ON" : "OFF");
+}
+
 // Static wrapper functions
 void WebServerManager::handleRootWrapper() 
 {
@@ -259,4 +270,9 @@ void WebServerManager::handleDashboardWrapper()
 void WebServerManager::handleToggleWrapper() 
 {
     if (instance) instance->handleToggle();
+}
+
+void WebServerManager::handleToggle2Wrapper() 
+{
+    if (instance) instance->handleToggle2();
 }

@@ -90,20 +90,36 @@ const char* LoginPage::dashboardHTML = R"delimiter(
                     }
                 });
         }
+        
+        function toggleButton2() {
+            fetch('/toggle2', {method: 'POST'})
+                .then(response => response.text())
+                .then(state => {
+                    const button = document.getElementById('toggleBtn2');
+                    if(state === 'ON') {
+                        button.textContent = 'ON';
+                        button.className = 'button on';
+                    } else {
+                        button.textContent = 'OFF';
+                        button.className = 'button off';
+                    }
+                });
+        }
     </script>
 </head>
 <body>
     <h1 class="title">ESP32 - DEIF Dashboard</h1>
     <div class="dashboard">
         <h2>Control Panel</h2>
-        <button id="toggleBtn" onclick="toggleButton()" class="button %BUTTON_STATE%">%BUTTON_TEXT%</button>
+        <button id="toggleBtn" onclick="toggleButton()" class="button %BUTTON_STATE%">%BUTTON_TEXT%</button><br>
+        <button id="toggleBtn2" onclick="toggleButton2()" class="button %BUTTON2_STATE%">%BUTTON2_TEXT%</button>
     </div>
 </body>
 </html>
 )delimiter";
 
 LoginPage::LoginPage(const char* user, const char* pass) 
-    : username(user), password(pass), buttonState(false), isAuthenticated(false) 
+    : username(user), password(pass), buttonState(false), button2State(false), isAuthenticated(false) 
     {
     begin();
 }
@@ -111,7 +127,9 @@ LoginPage::LoginPage(const char* user, const char* pass)
 void LoginPage::begin() 
 {
     pinMode(ledPin, OUTPUT);
+    pinMode(led2Pin, OUTPUT);
     digitalWrite(ledPin, LOW);
+    digitalWrite(led2Pin, LOW);
 }
 
 const char* LoginPage::getDashboardPage() const 
@@ -121,6 +139,8 @@ const char* LoginPage::getDashboardPage() const
     
     const char* stateClass = buttonState ? "on" : "off";
     const char* stateText = buttonState ? "ON" : "OFF";
+    const char* state2Class = button2State ? "on" : "off";
+    const char* state2Text = button2State ? "ON" : "OFF";
     
     char* pos = strstr(buffer, "%BUTTON_STATE%");
     if (pos) {
@@ -134,6 +154,20 @@ const char* LoginPage::getDashboardPage() const
         memmove(pos + strlen(stateText), pos + strlen("%BUTTON_TEXT%"), 
                 strlen(pos + strlen("%BUTTON_TEXT%")) + 1);
         memcpy(pos, stateText, strlen(stateText));
+    }
+    
+    pos = strstr(buffer, "%BUTTON2_STATE%");
+    if (pos) {
+        memmove(pos + strlen(state2Class), pos + strlen("%BUTTON2_STATE%"), 
+                strlen(pos + strlen("%BUTTON2_STATE%")) + 1);
+        memcpy(pos, state2Class, strlen(state2Class));
+    }
+    
+    pos = strstr(buffer, "%BUTTON2_TEXT%");
+    if (pos) {
+        memmove(pos + strlen(state2Text), pos + strlen("%BUTTON2_TEXT%"), 
+                strlen(pos + strlen("%BUTTON2_TEXT%")) + 1);
+        memcpy(pos, state2Text, strlen(state2Text));
     }
     
     return buffer;
@@ -153,9 +187,20 @@ void LoginPage::toggleButton()
     digitalWrite(ledPin, buttonState ? HIGH : LOW);
 }
 
+void LoginPage::toggleButton2() 
+{
+    button2State = !button2State;
+    digitalWrite(led2Pin, button2State ? HIGH : LOW);
+}
+
 bool LoginPage::getButtonState() const 
 {
     return buttonState;
+}
+
+bool LoginPage::getButton2State() const 
+{
+    return button2State;
 }
 
 void LoginPage::scanNetworks() 
