@@ -78,8 +78,28 @@ void WebServerManager::handleConnect()
 
     if (network.length() > 0 && wifi_password.length() > 0) 
     {
-        // Disconnect from any existing WiFi
+        // Check if already connected to the requested network
+        if (WiFi.status() == WL_CONNECTED && WiFi.SSID() == network) 
+        {
+            Serial.println("Already connected to the requested network!");
+            Serial.print("Current IP Address: ");
+            Serial.println(WiFi.localIP());
+            
+            isConnected = true;
+            loginPage.setAuthenticated(true);
+            
+            server.send(200, "text/html", 
+                "<h1>Already Connected!</h1>"
+                "<p>Network: " + network + "</p>"
+                "<p>IP Address: " + WiFi.localIP().toString() + "</p>"
+                "<p><a href='/dashboard'>Go to Dashboard</a></p>");
+            return;
+        }
+
+        // Disconnect from any existing WiFi and set mode to Station + AP
         WiFi.disconnect(true);
+        delay(1000);
+        WiFi.mode(WIFI_AP_STA);  // Enable both AP and Station modes
         delay(1000);
 
         // Attempt to connect to the new network
@@ -103,6 +123,11 @@ void WebServerManager::handleConnect()
             Serial.println("\nConnected successfully!");
             Serial.print("IP Address: ");
             Serial.println(WiFi.localIP());
+            
+            // Restart the server to ensure it's listening on the new IP
+            server.close();
+            delay(1000);
+            server.begin();
             
             server.send(200, "text/html", 
                 "<h1>Connected Successfully!</h1>"
